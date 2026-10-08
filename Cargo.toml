@@ -1,0 +1,49 @@
+[package]
+name = "autumn-plugin-markstream"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+description = "Autumn plugin: markstream (streaming Markdown) with Maud, htmx and SSE."
+license = "Apache-2.0"
+repository = "https://github.com/autumn-foundation/autumn-plugin-markstream"
+keywords = ["autumn", "markdown", "streaming", "htmx", "plugin"]
+categories = ["web-programming"]
+exclude = [".github/", "docs/", "scripts/", "tests/js/", "CLAUDE.md", "clippy.toml"]
+
+[features]
+default = []
+
+[dependencies]
+# No default features. The host app selects the Autumn features.
+autumn-web = { version = "0.8", default-features = false, features = ["maud"] }
+futures-util = { version = "0.3", default-features = false, features = ["std"] }
+# The `html!` macro expands to `maud::` paths.
+maud = "0.27"
+serde_json = "1"
+
+[dev-dependencies]
+# `htmx` and `embed-assets` are for the demo and the tests only.
+autumn-web = { version = "0.8", default-features = false, features = ["maud", "embed-assets", "htmx"] }
+base64 = "0.22"
+proptest = "1"
+regex = "1"
+sha2 = "0.10"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "time", "net", "process"] }
+
+[package.metadata.docs.rs]
+all-features = true
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"
+module_name_repetitions = "allow"
+redundant_pub_crate = "allow"

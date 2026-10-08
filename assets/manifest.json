@@ -1,0 +1,286 @@
+{
+  "files": {
+    "vendor/floating-ui/core.js": {
+      "integrity": "sha384-5nxNCbodX5riFtIrovS7N4jCTMGYsX5EYNBYPggJriLvUK9pVwizs8uLd6bp0uCT",
+      "package": "@floating-ui/core",
+      "rewritten": false,
+      "source": "https://cdn.jsdelivr.net/npm/@floating-ui/core@1.8.0/dist/floating-ui.core.browser.min.mjs",
+      "upstream_integrity": "sha384-5nxNCbodX5riFtIrovS7N4jCTMGYsX5EYNBYPggJriLvUK9pVwizs8uLd6bp0uCT",
+      "version": "1.8.0"
+    },
+    "vendor/floating-ui/dom.js": {
+      "integrity": "sha384-aZMxqRcg3Ea0Gf4+zd9aw+PnoXzOOYlHeH5RdHHSvtEl9VuVNYClL5f1Rq9TppVj",
+      "package": "@floating-ui/dom",
+      "rewritten": true,
+      "source": "https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.8.0/dist/floating-ui.dom.browser.min.mjs",
+      "upstream_integrity": "sha384-1PSZvhAsMseJpsCTy/VVQHL6KDhs2wXd7qgHv94ZTCXuPDAqm/sWltgnNvEChXe8",
+      "version": "1.8.0"
+    },
+    "vendor/markstream-core/index.js": {
+      "integrity": "sha384-1YP/9BRluYPCwbsY4DOpB09I6PnjdDIEu+zfyM7RBdRibUA81qgDPr3KEYFwRzuv",
+      "package": "markstream-core",
+      "rewritten": false,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-core@2.0.16/dist/index.js",
+      "upstream_integrity": "sha384-1YP/9BRluYPCwbsY4DOpB09I6PnjdDIEu+zfyM7RBdRibUA81qgDPr3KEYFwRzuv",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/CodeBlockNode.js": {
+      "integrity": "sha384-QlL4nXmh6ISaWCP0yq54H7TDPBqD/yU3FR4anZlc+msKqpVqd8xLa/Zg686PaNd7",
+      "package": "markstream-vue",
+      "rewritten": true,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/CodeBlockNode.js",
+      "upstream_integrity": "sha384-bwIMdJuFMqyKgqzvVkYsK0yVomSeDoMzM0iKbp1AEf/6RbS0sTqwnRCCggA1YvMu",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/PreCodeBlock.js": {
+      "integrity": "sha384-U29GPhtR2uwdvY1pSPHy5ZDCaLkgF2gjB/g6NiaNsRik4RV/+vHoy3FHdv1rHT4U",
+      "package": "markstream-vue",
+      "rewritten": false,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/PreCodeBlock.js",
+      "upstream_integrity": "sha384-U29GPhtR2uwdvY1pSPHy5ZDCaLkgF2gjB/g6NiaNsRik4RV/+vHoy3FHdv1rHT4U",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/PreCodeBlock.vue_vue_type_style_index_0_lang.js": {
+      "integrity": "sha384-+A98LAdwyhXUaDKqbRJErrmTAamvg1pJxo8/A8xrkhkMnU/LGzJ4wnrsoqVl3N2p",
+      "package": "markstream-vue",
+      "rewritten": true,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/PreCodeBlock.vue_vue_type_style_index_0_lang.js",
+      "upstream_integrity": "sha384-Ttr/s0kDmC6SeCfCeimDnp9BDSypiRyglmo8hWq6yTBXan2K4ThezYHuaFEj4kFT",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/Tooltip.js": {
+      "integrity": "sha384-kDhSFy0ue5JTD42aXX4cFVGUmu5KjSpTdLhi+uc6y5/MTar3YSD7zCqipDochCS6",
+      "package": "markstream-vue",
+      "rewritten": true,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/Tooltip.js",
+      "upstream_integrity": "sha384-w6kovgcpd58Ohw8mhMo2j1314Vf3D+t3TOnwae1xKI3fzQAIN78cKmjvziJQW/ZB",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/diagramHeight.js": {
+      "integrity": "sha384-4OsOYjx5f1hZsh4ZygME/ZoC8dZoFG8zlnXi4oSFnXcLurlS/jKcs1wnfuxpvRmo",
+      "package": "markstream-vue",
+      "rewritten": false,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/diagramHeight.js",
+      "upstream_integrity": "sha384-4OsOYjx5f1hZsh4ZygME/ZoC8dZoFG8zlnXi4oSFnXcLurlS/jKcs1wnfuxpvRmo",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/exports.js": {
+      "integrity": "sha384-Bj1Q0Rgylne4KjeSMjpawc4QJ6CBGzqegeheKWRXC4cHYbNx2GPQvIZ3rbZsGzGx",
+      "package": "markstream-vue",
+      "rewritten": true,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/exports.js",
+      "upstream_integrity": "sha384-g41u0NjQYDPDmk5JYzKQ4M8+EVKHzk4m9EF2xSjJNDKgHr9TkJTpFADCAnHtWA5f",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/extended.js": {
+      "integrity": "sha384-yczzNO9dScGwH7jlI0km10oUGxrZc//l4nMDG5TnqqbvpM28GybTAEGASbmfsDbh",
+      "package": "markstream-vue",
+      "rewritten": false,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/extended.js",
+      "upstream_integrity": "sha384-yczzNO9dScGwH7jlI0km10oUGxrZc//l4nMDG5TnqqbvpM28GybTAEGASbmfsDbh",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/index.css": {
+      "integrity": "sha384-ZkbT3JCa6OFNVUQEAC9mNOLGhZKh9NZCnPs1LkT20QtvqoZORof0Ifn74+O8qq47",
+      "package": "markstream-vue",
+      "rewritten": false,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/index.css",
+      "upstream_integrity": "sha384-ZkbT3JCa6OFNVUQEAC9mNOLGhZKh9NZCnPs1LkT20QtvqoZORof0Ifn74+O8qq47",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/index.js": {
+      "integrity": "sha384-u+yrr2tKZ9VKAOKeu6FaQ7tnGx8pqkdy2kVQX6xhsCghu1EeZ2Uv1THgDlQtrwXG",
+      "package": "markstream-vue",
+      "rewritten": true,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/index.js",
+      "upstream_integrity": "sha384-ZySoep1PQJWvZJ0CGBOGkEPSeXIoZ610tXnLfW3KM0iMTFF5f5yQKQ+ic8EzF8Tf",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/index10.js": {
+      "integrity": "sha384-Z1mueD7kECk2iL2bplQUOlR8UxRF4TbQWQg5lfBoHUjLNVS+zm/gpK7NDxW0noxy",
+      "package": "markstream-vue",
+      "rewritten": true,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/index10.js",
+      "upstream_integrity": "sha384-fKsHqSvWZUTt0GbAO21AS3SvLrvxhlo/ZR+tKNFsxMpF3uZihu8ftWrb+ofMEtt6",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/index2.js": {
+      "integrity": "sha384-g2LwydndaygdL4H2vpvZCnIxtP/A0kMfOusVlycRvKSWWio1a5LzsC7QY33ZwcyD",
+      "package": "markstream-vue",
+      "rewritten": true,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/index2.js",
+      "upstream_integrity": "sha384-JoffP9gRCRG2m5nT0MYJZGdlfHku5cmgrQKWg2KUQriq+TMfGdZ9t3D5kylm6moN",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/index3.js": {
+      "integrity": "sha384-Yn7TZQtZ7OrapG0VDk+ijeQ6KkvjK/vXiy7QB5dumCX6561khHpbY99Q4sR9O+0T",
+      "package": "markstream-vue",
+      "rewritten": false,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/index3.js",
+      "upstream_integrity": "sha384-Yn7TZQtZ7OrapG0VDk+ijeQ6KkvjK/vXiy7QB5dumCX6561khHpbY99Q4sR9O+0T",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/index4.js": {
+      "integrity": "sha384-SnOkhHn04wkB3m7wV/9HJM0klzx1pNbFrlnextAysCugW3l/Il+NDxrKGFeQp3Aw",
+      "package": "markstream-vue",
+      "rewritten": false,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/index4.js",
+      "upstream_integrity": "sha384-SnOkhHn04wkB3m7wV/9HJM0klzx1pNbFrlnextAysCugW3l/Il+NDxrKGFeQp3Aw",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/index5.js": {
+      "integrity": "sha384-a9p3M9Yx/hZLH92uctj+IUKED+NO8uVzhKi0EuzrRMlPlfhrew6a/HpAqZcbj/VO",
+      "package": "markstream-vue",
+      "rewritten": true,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/index5.js",
+      "upstream_integrity": "sha384-w3Id3f9skZy36OtOnUy/TjjONsWhlGd1eA7qLNVaD/fGta6ogkpWgH2dWim8G+Lg",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/index6.js": {
+      "integrity": "sha384-6ISOLNQdT6OzeoflgNm/1Z1BcV1V95d9RjGYtuVpekT21avKlYjld3OLGbkzAChE",
+      "package": "markstream-vue",
+      "rewritten": true,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/index6.js",
+      "upstream_integrity": "sha384-aPlFYdfETRgXkGuGiSQMaiQhure7pZFFKZjm8Zy8WZZp/1RDXSbxengsHZ2pb2+V",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/index7.js": {
+      "integrity": "sha384-1ud5cNzMVw3nn3UIs1mU17tFiGbIaC2uCaP/ccbrthu06aKuu4k76sK2qnrBNtjR",
+      "package": "markstream-vue",
+      "rewritten": true,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/index7.js",
+      "upstream_integrity": "sha384-UX7hev00vdmNeCnoGnr9rDnoAtw7s2O7/PPzDAsL9RoUR1H/gYPyrfC79PjF+eAs",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/index8.js": {
+      "integrity": "sha384-VK8yFxlzvf8q4HlBiSBx1ek7sRMsc2sbS5ZFRuAtXAshN2rWQ5qA2lqkOGVl4PiT",
+      "package": "markstream-vue",
+      "rewritten": true,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/index8.js",
+      "upstream_integrity": "sha384-AHVUDi7X8/U19Je0xOcYhrb8JssZIULSbGiVx8y/JMAQKhL3iPrDTpVhVEiUE44Z",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/index9.js": {
+      "integrity": "sha384-dsOkJ0LmiEdx+ZZRFWqXSgA7ll7GN3rCE37iOxVBkbgufAFeInSxip06hRQsRbgI",
+      "package": "markstream-vue",
+      "rewritten": true,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/index9.js",
+      "upstream_integrity": "sha384-DCK7/H1R2W9FiSWEkuQ+gLTnALgZV6/WJHePFbw5nstUjfbVso/+z2ehEBViCu3K",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/layout.js": {
+      "integrity": "sha384-FW28bORnko4tWvmcMKk4C62Yd7CFYrsZqe2s7BKA+AdFwWSI64su+pDm/lxawenU",
+      "package": "markstream-vue",
+      "rewritten": false,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/layout.js",
+      "upstream_integrity": "sha384-FW28bORnko4tWvmcMKk4C62Yd7CFYrsZqe2s7BKA+AdFwWSI64su+pDm/lxawenU",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/mermaidSequenceSemicolons.js": {
+      "integrity": "sha384-Bg1KcPxF36BWYPVwe27MiF2OsQ7ic9EhsUmreljq2+fELfUqzDCl03uOH0rkav/z",
+      "package": "markstream-vue",
+      "rewritten": false,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/mermaidSequenceSemicolons.js",
+      "upstream_integrity": "sha384-Bg1KcPxF36BWYPVwe27MiF2OsQ7ic9EhsUmreljq2+fELfUqzDCl03uOH0rkav/z",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/preCodeDiffMetrics.js": {
+      "integrity": "sha384-rDe52wZ/D+RAoOh+WVUE25GsqYNOGqwUcYC6Hr/T/rmTDftHm2w5ZL8ji4I+6q+n",
+      "package": "markstream-vue",
+      "rewritten": false,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/preCodeDiffMetrics.js",
+      "upstream_integrity": "sha384-rDe52wZ/D+RAoOh+WVUE25GsqYNOGqwUcYC6Hr/T/rmTDftHm2w5ZL8ji4I+6q+n",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/streamDiffs.js": {
+      "integrity": "sha384-RQ+SyN/381r1/z5T3o8YOzV3Vznc8LumY919BNfsbeDPxN2RKK310TkJS30ahHCF",
+      "package": "markstream-vue",
+      "rewritten": false,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/streamDiffs.js",
+      "upstream_integrity": "sha384-RQ+SyN/381r1/z5T3o8YOzV3Vznc8LumY919BNfsbeDPxN2RKK310TkJS30ahHCF",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/utils/katex-threshold.js": {
+      "integrity": "sha384-jgtoeoiP1i2s1bQIBEksaEYwpsuICQUwaQrs91kkeQleDA0dk/r4nyfK4e8J+Xfm",
+      "package": "markstream-vue",
+      "rewritten": false,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/utils/katex-threshold.js",
+      "upstream_integrity": "sha384-jgtoeoiP1i2s1bQIBEksaEYwpsuICQUwaQrs91kkeQleDA0dk/r4nyfK4e8J+Xfm",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/utils/performance-monitor.js": {
+      "integrity": "sha384-aQcj+yUSLBcUYj+es75JjwWRqEbXpG3htd3qziBBzes5cM0vaOsVbpcJGAKIl/7H",
+      "package": "markstream-vue",
+      "rewritten": false,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/utils/performance-monitor.js",
+      "upstream_integrity": "sha384-aQcj+yUSLBcUYj+es75JjwWRqEbXpG3htd3qziBBzes5cM0vaOsVbpcJGAKIl/7H",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/utils/safeRaf.js": {
+      "integrity": "sha384-1Qf3/nydqmMDcRSnt7qJT4I9izDq6Di0Jj3zgOtIFIns00iERcPFs/xTGIjMHNTG",
+      "package": "markstream-vue",
+      "rewritten": false,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/utils/safeRaf.js",
+      "upstream_integrity": "sha384-1Qf3/nydqmMDcRSnt7qJT4I9izDq6Di0Jj3zgOtIFIns00iERcPFs/xTGIjMHNTG",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/workers-katexWorkerClient.js": {
+      "integrity": "sha384-5mbEnWORvvW45Bu6CBrJkHbeOKjSvcrq9pvv7YbqelrH+7ONb5pAtHInP/NyISwj",
+      "package": "markstream-vue",
+      "rewritten": false,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/workers-katexWorkerClient.js",
+      "upstream_integrity": "sha384-5mbEnWORvvW45Bu6CBrJkHbeOKjSvcrq9pvv7YbqelrH+7ONb5pAtHInP/NyISwj",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/workers-mermaidWorkerClient.js": {
+      "integrity": "sha384-Jh1LMoyszuKRKJ7BqlY2ilI/UIZJQdH7F6d/YeGX7T+dlTEnXSLK9dCAEr12VPqs",
+      "package": "markstream-vue",
+      "rewritten": false,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/workers-mermaidWorkerClient.js",
+      "upstream_integrity": "sha384-Jh1LMoyszuKRKJ7BqlY2ilI/UIZJQdH7F6d/YeGX7T+dlTEnXSLK9dCAEr12VPqs",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/workers/katexCdnWorker.js": {
+      "integrity": "sha384-reo3tTXt+pZRfl8/VT9367RQiSz5ixhKd3nY/VZVsEVuiVq8cGzQ9FPgqfKrZuLp",
+      "package": "markstream-vue",
+      "rewritten": false,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/workers/katexCdnWorker.js",
+      "upstream_integrity": "sha384-reo3tTXt+pZRfl8/VT9367RQiSz5ixhKd3nY/VZVsEVuiVq8cGzQ9FPgqfKrZuLp",
+      "version": "2.0.16"
+    },
+    "vendor/markstream-vue/workers/mermaidCdnWorker.js": {
+      "integrity": "sha384-qqEDol3mOAfYiwRi4fb1OJJi3VfPYd6SOkmVo2PeWgrC8ylrxePWhOrgQEEwrTGo",
+      "package": "markstream-vue",
+      "rewritten": false,
+      "source": "https://cdn.jsdelivr.net/npm/markstream-vue@2.0.16/dist/workers/mermaidCdnWorker.js",
+      "upstream_integrity": "sha384-qqEDol3mOAfYiwRi4fb1OJJi3VfPYd6SOkmVo2PeWgrC8ylrxePWhOrgQEEwrTGo",
+      "version": "2.0.16"
+    },
+    "vendor/stream-markdown-parser/index.js": {
+      "integrity": "sha384-noVkbltxXNY7uZuMJaOXFqZmQKX1aUY4vMYOOBRtdNH5FKAH5pQo0SuoXXLEzYaf",
+      "package": "stream-markdown-parser",
+      "rewritten": false,
+      "source": "https://cdn.jsdelivr.net/npm/stream-markdown-parser@1.2.18/dist/index.js",
+      "upstream_integrity": "sha384-noVkbltxXNY7uZuMJaOXFqZmQKX1aUY4vMYOOBRtdNH5FKAH5pQo0SuoXXLEzYaf",
+      "version": "1.2.18"
+    },
+    "vendor/vue/vue.runtime.esm-browser.prod.js": {
+      "integrity": "sha384-vEZtadM/3T3ZM6i+fUKLcHKLaIcGGSsxf9yOaz+NozCxea/8lpwNLctTUiO1ddD5",
+      "package": "vue",
+      "rewritten": false,
+      "source": "https://cdn.jsdelivr.net/npm/vue@3.5.43/dist/vue.runtime.esm-browser.prod.js",
+      "upstream_integrity": "sha384-vEZtadM/3T3ZM6i+fUKLcHKLaIcGGSsxf9yOaz+NozCxea/8lpwNLctTUiO1ddD5",
+      "version": "3.5.43"
+    }
+  },
+  "homepage": "https://markstream.simonhe.me",
+  "license": "MIT (see assets/licenses/)",
+  "notes": "Vendoring provenance. Not served. 'upstream_integrity' pins the bytes from the CDN. 'integrity' pins the served bytes after the bare-import rewrite.",
+  "optional_peers": [
+    "@terrastruct/d2",
+    "katex",
+    "katex/dist/contrib/mhchem",
+    "mermaid",
+    "stream-diffs/markstream"
+  ]
+}
