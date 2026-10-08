@@ -128,6 +128,9 @@ export function reduce(state, type, text) {
   }
 }
 
+/** The markstream custom-component scope of this plugin. */
+export const CUSTOM_ID = "autumn-markstream";
+
 /** The props for the markstream `MarkdownRender` component. */
 export function rendererProps(options, state) {
   const props = {
@@ -136,8 +139,8 @@ export function rendererProps(options, state) {
     htmlPolicy: options.htmlPolicy,
     isDark: options.isDark,
     typewriter: options.typewriter,
-    // No syntax highlighter is vendored. Plain <pre> blocks load no chunk.
-    renderCodeBlocksAsPre: true,
+    // init.js maps "code_block" to its own component for this id.
+    customId: CUSTOM_ID,
   };
   if (options.mode !== null) {
     props.mode = options.mode;
@@ -146,4 +149,132 @@ export function rendererProps(options, state) {
     props.maxLiveNodes = options.maxLiveNodes;
   }
   return props;
+}
+
+// --- Syntax highlighting -------------------------------------------------
+
+/** Longest code that highlight() tokenizes. Longer code stays plain. */
+export const HIGHLIGHT_LIMIT = 100000;
+
+const C_KEYWORDS =
+  "as async await break case catch class const continue crate default defer do else enum export extends " +
+  "extern fn for from func function go if impl import in interface let loop match mod move mut new null " +
+  "nil package private protected pub public ref return self static struct super switch this throw trait " +
+  "true false try type typeof undefined union unsafe use var void where while yield";
+const PY_KEYWORDS =
+  "and as assert async await break class continue def del elif else except finally for from global if " +
+  "import in is lambda None nonlocal not or pass raise return True False try while with yield";
+const SH_KEYWORDS =
+  "case do done elif else esac fi for function if in select then until while export local return";
+const SQL_KEYWORDS =
+  "select from where insert into values update set delete create table drop alter join left right inner " +
+  "outer on group by order having limit and or not null as distinct union primary key index";
+const DATA_KEYWORDS = "true false null";
+
+const FAMILIES = {
+  c: { keywords: C_KEYWORDS, line: ["//"], block: true, hash: false },
+  python: { keywords: PY_KEYWORDS, line: ["#"], block: false, hash: true },
+  shell: { keywords: SH_KEYWORDS, line: ["#"], block: false, hash: true },
+  sql: { keywords: SQL_KEYWORDS, line: ["--"], block: true, hash: false, ci: true },
+  data: { keywords: DATA_KEYWORDS, line: [], block: false, hash: false },
+  yaml: { keywords: DATA_KEYWORDS, line: ["#"], block: false, hash: true },
+};
+const LANGUAGE_FAMILY = {};
+for (const [family, names] of Object.entries({
+  c: "c cpp c++ h hpp cs csharp java js jsx javascript ts tsx typescript rust rs go kotlin swift scala php dart css scss",
+  python: "py python rb ruby",
+  shell: "sh bash zsh shell console",
+  sql: "sql",
+  data: "json jsonc json5",
+  yaml: "yaml yml toml ini",
+})) {
+  for (const name of names.split(" ")) {
+    LANGUAGE_FAMILY[name] = family;
+  }
+}
+
+const WORD_START = /[A-Za-z_$]/;
+const WORD_CHAR = /[A-Za-z0-9_$]/;
+const DIGIT = /[0-9]/;
+const NUMBER_CHAR = /[0-9A-Za-z_.]/;
+
+/**
+ * Splits `code` into `{ type, text }` tokens for the language `lang`.
+ * `type` is "plain", "keyword", "string", "number" or "comment".
+ * - The tokens join back to `code` exactly.
+ * - An unknown language gets strings, numbers and C comments, no keywords.
+ * - Code longer than HIGHLIGHT_LIMIT is one plain token.
+ * - No input throws.
+ */
+export function highlight(code, lang) {
+  const text = String(code ?? "");
+  if (text === "") {
+    return [];
+  }
+  if (text.length > HIGHLIGHT_LIMIT) {
+    return [{ type: "plain", text }];
+  }
+  const name = String(lang ?? "").trim().toLowerCase();
+  const known = Object.hasOwn(LANGUAGE_FAMILY, name);
+  const family = FAMILIES[known ? LANGUAGE_FAMILY[name] : "c"];
+  const keywords = known ? new Set(family.keywords.split(" ")) : new Set();
+  const out = [];
+  let plain = "";
+  let i = 0;
+
+  const flush = () => {
+    if (plain !== "") {
+      out.push({ type: "plain", text: plain });
+      plain = "";
+    }
+  };
+  const push = (type, end) => {
+    flush();
+    out.push({ type, text: text.slice(i, end) });
+    i = end;
+  };
+  const lineEnd = (from) => {
+    const at = text.indexOf("\n", from);
+    return at === -1 ? text.length : at;
+  };
+
+  while (i < text.length) {
+    const ch = text[i];
+    const marker = family.line.find((m) => text.startsWith(m, i));
+    if (marker !== undefined) {
+      push("comment", lineEnd(i));
+    } else if (family.block && text.startsWith("/*", i)) {
+      const at = text.indexOf("*/", i + 2);
+      push("comment", at === -1 ? text.length : at + 2);
+    } else if (ch === '"' || ch === "'" || (ch === "`" && family === FAMILIES.c)) {
+      let j = i + 1;
+      while (j < text.length && text[j] !== ch && !(text[j] === "\n" && ch !== "`")) {
+        j += text[j] === "\\" ? 2 : 1;
+      }
+      push("string", Math.min(j < text.length && text[j] === ch ? j + 1 : j, text.length));
+    } else if (DIGIT.test(ch) && !WORD_CHAR.test(text[i - 1] ?? " ")) {
+      let j = i + 1;
+      while (j < text.length && NUMBER_CHAR.test(text[j])) {
+        j += 1;
+      }
+      push("number", j);
+    } else if (WORD_START.test(ch)) {
+      let j = i + 1;
+      while (j < text.length && WORD_CHAR.test(text[j])) {
+        j += 1;
+      }
+      const word = text.slice(i, j);
+      if (keywords.has(family.ci ? word.toLowerCase() : word)) {
+        push("keyword", j);
+      } else {
+        plain += word;
+        i = j;
+      }
+    } else {
+      plain += ch;
+      i += 1;
+    }
+  }
+  flush();
+  return out;
 }

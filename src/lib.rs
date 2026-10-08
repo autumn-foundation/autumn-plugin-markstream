@@ -43,7 +43,8 @@
 //!
 //! # Limits
 //!
-//! - No syntax highlighting. Code blocks render as plain `<pre>`.
+//! - Syntax highlighting is light: keywords, strings, numbers and comments for
+//!   common languages. It is not Monaco or Shiki.
 //! - No Mermaid, D2 or infographic. These blocks show their source.
 //! - No KaTeX unless the page loads KaTeX as a global (`window.katex`).
 //! - The browser does not reconnect a stream. A dropped stream shows the

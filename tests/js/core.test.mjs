@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   ATTR,
   decodeData,
+  highlight,
   initialState,
   readOptions,
   reduce,
@@ -165,7 +166,7 @@ test("rendererProps: maps options and state to markstream props", () => {
     htmlPolicy: "escape",
     isDark: false,
     typewriter: false,
-    renderCodeBlocksAsPre: true,
+    customId: "autumn-markstream",
     mode: "docs",
     maxLiveNodes: 5,
   });
@@ -192,4 +193,44 @@ test("sameOriginUrl: only same-origin http(s) URLs", () => {
   assert.equal(sameOriginUrl("http://exa mple.com/", base), null);
   assert.equal(sameOriginUrl("", base), null);
   assert.equal(sameOriginUrl(null, base), null);
+});
+
+test("highlight: tokens rejoin to the exact source", () => {
+  const code = 'fn main() {\n    // hi\n    let s = "a\\"b"; let n = 0x1F + 2.5;\n}\n';
+  const tokens = highlight(code, "rust");
+  assert.equal(tokens.map((t) => t.text).join(""), code);
+});
+
+test("highlight: classifies keyword, string, number, comment", () => {
+  const kinds = Object.fromEntries(
+    highlight('let s = "x"; // c\nn = 42', "js").map((t) => [t.text, t.type]),
+  );
+  assert.equal(kinds["let"], "keyword");
+  assert.equal(kinds['"x"'], "string");
+  assert.equal(kinds["42"], "number");
+  assert.equal(kinds["// c"], "comment");
+});
+
+test("highlight: hash comments only for hash languages", () => {
+  assert.equal(highlight("# c", "python")[0].type, "comment");
+  assert.equal(highlight("# c", "rust")[0].type, "plain");
+});
+
+test("highlight: unknown language and empty input are safe", () => {
+  assert.deepEqual(highlight("", "rust"), []);
+  const tokens = highlight("if x", "no-such-lang");
+  assert.equal(tokens.map((t) => t.text).join(""), "if x");
+  assert.ok(tokens.every((t) => t.type === "plain" || t.type === "string" || t.type === "number" || t.type === "comment"));
+});
+
+test("highlight: unterminated string and comment end at the input end", () => {
+  const a = highlight('"abc', "js");
+  assert.deepEqual(a, [{ type: "string", text: '"abc' }]);
+  const b = highlight("/* abc", "js");
+  assert.deepEqual(b, [{ type: "comment", text: "/* abc" }]);
+});
+
+test("highlight: very long input falls back to plain", () => {
+  const big = "let x;\n".repeat(20000);
+  assert.deepEqual(highlight(big, "js"), [{ type: "plain", text: big }]);
 });
