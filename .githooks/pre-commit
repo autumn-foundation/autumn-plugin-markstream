@@ -1,0 +1,8 @@
+#!/bin/sh
+# Pre-commit checks. Enable: git config core.hooksPath .githooks
+set -e
+cargo fmt --check
+cargo clippy --all-targets -- -D warnings
+cargo test --quiet
+node --test tests/js/*.test.mjs
+python3 -m unittest scripts/test_vendor.py

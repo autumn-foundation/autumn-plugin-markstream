@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+
+jobs:
+  rust:
+    name: fmt, clippy, test, coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # The toolchain comes from rust-toolchain.toml (pinned).
+      - run: rustup show active-toolchain
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets -- -D warnings
+      - run: cargo test
+      - uses: taiki-e/install-action@cargo-llvm-cov
+      - run: cargo llvm-cov --lib --ignore-filename-regex 'test_support' --fail-under-lines 85
+
+  msrv:
+    name: MSRV (1.88)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install 1.88 --profile minimal
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo +1.88 check --all-targets --locked
+
+  js:
+    name: init module tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test tests/js/*.test.mjs
+
+  e2e:
+    name: browser test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - run: cargo build --example markstream_demo
+      - run: node tests/e2e/demo.e2e.mjs
+      - run: node tests/e2e/demo.e2e.mjs
+        env:
+          CSP_NONCE: "1"
+
+  vendor:
+    name: vendored files match upstream
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m unittest scripts/test_vendor.py
+      - run: python3 scripts/vendor.py
+      - name: No changed or new files
+        run: |
+          git status --porcelain -- assets src/vendored.rs
+          test -z "$(git status --porcelain -- assets src/vendored.rs)"
