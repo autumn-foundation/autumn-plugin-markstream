@@ -19,7 +19,8 @@ Autumn plugin for markstream (streaming Markdown). Rust crate, Autumn 0.8.
   `assets/core.js`. A test checks this.
 - Keep event names the same in `src/sse.rs` and `assets/core.js`.
 - Write no inline script and no import map. The default CSP blocks them.
-- Default to safe values (`escape` HTML policy).
+- Default to safe values (`escape` HTML policy). `trusted` needs the page
+  meta opt-in. Stream URLs must be same-origin.
 - Write docs and comments in ASD-STE100 style: short, active, simple tense.
 
 ## Commands
@@ -29,8 +30,10 @@ cargo fmt --check
 cargo clippy --all-targets -- -D warnings
 cargo test
 node --test tests/js/*.test.mjs
+python3 -m unittest scripts/test_vendor.py
 cargo build --example markstream_demo && node tests/e2e/demo.e2e.mjs
-cargo llvm-cov --lib --fail-under-lines 85
+CSP_NONCE=1 node tests/e2e/demo.e2e.mjs
+cargo llvm-cov --lib --ignore-filename-regex test_support --fail-under-lines 85
 python3 scripts/vendor.py   # update vendored files
 ```
 

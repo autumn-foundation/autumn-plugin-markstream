@@ -14,8 +14,8 @@
 //!
 //! Autumn serves each file under `/static/_plugins/markstream/` at a hashed
 //! URL (`immutable`) and at a plain URL (`must-revalidate`). Relative
-//! imports resolve to the plain URLs. `assets/manifest.json` and
-//! `assets/licenses/` are not served.
+//! imports resolve to the plain URLs. Autumn does not serve
+//! `assets/manifest.json` or `assets/licenses/`.
 
 use autumn_web::assets::PluginAssets;
 

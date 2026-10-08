@@ -5,3 +5,4 @@ cargo fmt --check
 cargo clippy --all-targets -- -D warnings
 cargo test --quiet
 node --test tests/js/*.test.mjs
+python3 -m unittest scripts/test_vendor.py

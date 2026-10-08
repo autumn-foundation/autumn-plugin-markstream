@@ -47,6 +47,7 @@ flowchart LR
 - Tests guard the rewrite: each relative import resolves in the bundle,
   no required bare import remains, no `eval` exists.
 - Relative imports resolve to plain URLs (`must-revalidate`, `ETag`).
-  Only the entry uses the `immutable` hashed URL.
-- Lazy chunks have no SRI check. They come from the same origin.
+  Only the init module and the two stylesheets use the `immutable`
+  hashed URL.
+- Lazy modules have no SRI check. They come from the same origin.
 - A markstream upgrade changes chunk names. Run the script again.

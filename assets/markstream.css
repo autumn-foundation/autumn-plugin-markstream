@@ -1,11 +1,16 @@
 /* Autumn markstream plugin styles. */
 
-/* The Markdown source shows before the init module runs. */
+/* The Markdown source shows until the init module mounts the container. */
 .markstream-source {
   margin: 0;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   font: inherit;
+}
+
+/* A mounted container keeps its source for htmx history, but hides it. */
+[data-markstream][data-markstream-mounted] > .markstream-source {
+  display: none;
 }
 
 /* A stream that stopped before "done". */

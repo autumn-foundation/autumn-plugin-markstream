@@ -24,8 +24,18 @@
   `error`, at the end. `error` has no details.
 - The init module closes the `EventSource` on `done` and on each `error`
   event. It does not reconnect.
-- The default HTML policy is `escape`. `trusted` is an explicit opt-in.
-- The init module does not mount a container inside a mounted container.
+- The default HTML policy is `escape`. `trusted` needs two opt-ins: the
+  container attribute and a page meta tag (`markstream_allow_trusted()`).
+  Without the meta tag, the init module uses `safe`. Injected markup that
+  keeps `data-*` attributes then cannot ask for raw HTML.
+- `data-markstream-src` must have the same origin as the page.
+- The init module does not mount a container inside a mounted container
+  or inside rendered Markdown. It checks each element just before its
+  mount, and it skips elements that are not in the document.
+- Rendered Markdown goes in a `<div hx-disable>`. htmx then ignores `hx-*`
+  attributes in it, also in an htmx history copy.
+- The source `<pre>` stays in the container (hidden) and follows the text.
+  An htmx history copy then mounts again with its text.
 
 ## Consequences
 

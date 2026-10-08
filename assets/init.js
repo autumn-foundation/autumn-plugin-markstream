@@ -11,7 +11,8 @@
  * reconnect starts the stream again and shows the text two times.
  *
  * DOM events (they bubble): markstream:mount, markstream:done,
- * markstream:error. Global API: window.AutumnMarkstream.
+ * markstream:error. It sends markstream:ready on document.
+ * Global API: window.AutumnMarkstream.
  */
 import { createApp, h, shallowRef } from "./vendor/vue/vue.runtime.esm-browser.prod.js";
 import MarkdownRender, {
@@ -21,6 +22,7 @@ import MarkdownRender, {
   disableMermaid,
 } from "./vendor/markstream-vue/index.js";
 import {
+  ALLOW_TRUSTED,
   ATTR,
   EVENTS,
   MOUNTED,
@@ -30,6 +32,7 @@ import {
   readOptions,
   reduce,
   rendererProps,
+  sameOriginUrl,
 } from "./core.js";
 
 // Optional peers are not vendored. Turn them off: markstream then shows
@@ -42,6 +45,7 @@ if (!globalThis.katex) {
 }
 
 const SELECTOR = "[" + ATTR.root + "]";
+const RENDER = "markstream-render";
 const handles = new WeakMap();
 
 function prefersDark() {
@@ -51,8 +55,37 @@ function prefersDark() {
   );
 }
 
+/** True when the page head opts in to the "trusted" HTML policy. */
+function trustedAllowed() {
+  return document.head !== null && document.head.querySelector('meta[name="' + ALLOW_TRUSTED + '"]') !== null;
+}
+
 function emit(el, name, detail) {
   el.dispatchEvent(new CustomEvent("markstream:" + name, { bubbles: true, detail }));
+}
+
+/**
+ * Keeps the source <pre> and adds a fresh render target.
+ * It removes old rendered output, for example from an htmx history copy.
+ * `hx-disable` stops htmx from running hx-* attributes in the Markdown.
+ */
+function prepare(el) {
+  let source = el.querySelector(":scope > pre.markstream-source");
+  if (source === null) {
+    source = document.createElement("pre");
+    source.className = "markstream-source";
+    el.prepend(source);
+  }
+  for (const child of Array.from(el.children)) {
+    if (child !== source) {
+      child.remove();
+    }
+  }
+  const target = document.createElement("div");
+  target.className = RENDER;
+  target.setAttribute("hx-disable", "");
+  el.append(target);
+  return { source, target };
 }
 
 /** Mounts markstream on `el` and returns its handle. */
@@ -61,11 +94,14 @@ function mount(el) {
   if (existing) {
     return existing;
   }
-  const options = readOptions((name) => el.getAttribute(name), prefersDark());
-  const source = el.querySelector(":scope > pre.markstream-source");
-  const state = shallowRef(initialState(source ? source.textContent : "", options.src !== null));
+  const options = readOptions((name) => el.getAttribute(name), prefersDark(), {
+    allowTrusted: trustedAllowed(),
+  });
+  const { source, target } = prepare(el);
+  const state = shallowRef(initialState(source.textContent, options.src !== null));
   const app = createApp({ render: () => h(MarkdownRender, rendererProps(options, state.value)) });
   let events = null;
+  let active = true;
 
   function close() {
     if (events !== null) {
@@ -74,15 +110,24 @@ function mount(el) {
     }
   }
 
+  function show(next) {
+    el.setAttribute(STATE, next.status);
+    el.setAttribute("aria-busy", String(next.status === "streaming"));
+  }
+
   function apply(type, text) {
+    if (!active) {
+      return;
+    }
     const before = state.value;
     const next = reduce(before, type, text);
     if (next === before) {
       return;
     }
     state.value = next;
-    el.setAttribute(STATE, next.status);
-    el.setAttribute("aria-busy", String(next.status === "streaming"));
+    // The source keeps the text, so an htmx history copy can mount again.
+    source.textContent = next.content;
+    show(next);
     if (next.status !== "streaming") {
       close();
       emit(el, next.status, { content: next.content });
@@ -98,41 +143,58 @@ function mount(el) {
     finish: () => apply("done", null),
     /** Marks the text final and failed. */
     fail: () => apply("error", null),
-    /** Opens a new stream with `text` (default ""). */
-    reset: (text = "") => apply("reset", String(text)),
+    /** Closes the SSE stream. Sets the text to `text` (default "") and
+     *  marks it as not final. It opens no connection. */
+    reset(text = "") {
+      close();
+      apply("reset", String(text));
+    },
     /** The current text. */
     content: () => state.value.content,
     /** "streaming", "done" or "error". */
     status: () => state.value.status,
-    /** Closes the stream and removes markstream from `el`. */
+    /** Closes the stream and removes markstream. The source shows again. */
     unmount() {
+      if (!active) {
+        return;
+      }
+      active = false;
       close();
       app.unmount();
       handles.delete(el);
       el.removeAttribute(MOUNTED);
+      el.removeAttribute("aria-busy");
     },
   });
 
   handles.set(el, handle);
   el.setAttribute(MOUNTED, "");
-  el.setAttribute(STATE, state.value.status);
-  app.mount(el);
+  show(state.value);
+  app.mount(target);
 
+  emit(el, "mount", { status: state.value.status });
   if (options.src !== null) {
-    events = new EventSource(options.src);
-    for (const type of EVENTS) {
-      // "error" also fires when the connection fails or closes early.
-      events.addEventListener(type, (e) => apply(type, decodeData(e.data)));
+    const url = sameOriginUrl(options.src, document.baseURI);
+    try {
+      if (url === null) {
+        throw new TypeError("markstream: src must be a same-origin URL");
+      }
+      events = new EventSource(url);
+      for (const type of EVENTS) {
+        // "error" also fires when the connection fails or closes early.
+        events.addEventListener(type, (e) => apply(type, decodeData(e.data)));
+      }
+    } catch {
+      apply("error", null);
     }
   }
-  emit(el, "mount", { status: state.value.status });
   return handle;
 }
 
-/** True when `el` is inside a mounted container (rendered content). */
+/** True when `el` is inside a mounted container or rendered Markdown. */
 function nested(el) {
   const parent = el.parentElement;
-  return parent !== null && parent.closest("[" + MOUNTED + "]") !== null;
+  return parent !== null && parent.closest("[" + MOUNTED + "], ." + RENDER) !== null;
 }
 
 /** Mounts each container in `root` (and `root` itself). */
@@ -145,14 +207,30 @@ function scan(root) {
     found.unshift(root);
   }
   for (const el of found) {
-    // Rendered Markdown must not start a new container or stream.
-    if (!handles.has(el) && !nested(el)) {
-      mount(el);
+    // Check each element just before its mount: an earlier mount can
+    // remove it. Rendered Markdown must not start a container or stream.
+    if (!handles.has(el) && el.isConnected && !nested(el)) {
+      try {
+        mount(el);
+      } catch (err) {
+        console.error("markstream: mount failed", err);
+      }
     }
   }
 }
 
+function unmountTarget(e) {
+  const target = e.detail && e.detail.target;
+  const handle = target ? handles.get(target) : undefined;
+  if (handle && e.detail.shouldSwap !== false) {
+    handle.unmount();
+  }
+}
+
 document.addEventListener("htmx:load", (e) => scan(e.detail && e.detail.elt));
+// A swap into a container replaces its children: unmount it first.
+document.addEventListener("htmx:beforeSwap", unmountTarget);
+document.addEventListener("htmx:oobBeforeSwap", unmountTarget);
 document.addEventListener("htmx:beforeCleanupElement", (e) => {
   const handle = e.detail && e.detail.elt ? handles.get(e.detail.elt) : undefined;
   if (handle) {

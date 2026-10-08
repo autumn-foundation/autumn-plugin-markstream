@@ -68,16 +68,16 @@ Use no npm, no bundler and no inline script.
 - **Red (feeling):** Users want "it just works" in one line. Raw Markdown
   in a `<pre>` before the script runs is honest and readable.
 - **Black (risk):** A large unminified parser (850 KB). No syntax
-  highlighting without `stream-diffs`. No Mermaid or KaTeX by default.
+  highlighting: code blocks render as plain `<pre>`. No Mermaid or KaTeX by default.
   Rewritten files differ from upstream, so we pin two hashes. Only the
   entry and the preloaded modules have SRI checks.
 - **Yellow (value):** LLM chat UIs in Autumn with no JS toolchain. The
   htmx flow stays the same. The SSE helpers make the server side small.
 - **Green (ideas):** Server-side fallback HTML. KaTeX and Mermaid as
   opt-in features. WebSocket helper. Minify the parser. Keep these for
-  later (see the roadmap in the README).
+  later (see "Limits" in the README).
 - **Blue (process):** TDD for each slice (red, green, refactor). The
-  order is: assets, plugin, head tags, builder, SSE, init script, example,
+  order is: assets, plugin, head tags, builder, SSE, init module, example,
   browser test, docs, CI.
 
 ## Decisions
@@ -93,9 +93,9 @@ Use no npm, no bundler and no inline script.
 - Default `htmlPolicy` is `escape` (ADR 0002).
 - SSE protocol: `chunk`, `replace`, `done`, `error`. Data is a JSON
   string (ADR 0002).
-- Verus is not available in this environment. GitHub release downloads
-  are blocked. The stream event order has a reference model and property
-  tests instead.
+- Verus is not available in this environment. The proxy blocks GitHub
+  release downloads. The stream event order has a reference model and
+  property tests instead.
 
 ## Acceptance criteria
 
@@ -110,7 +110,8 @@ Use no npm, no bundler and no inline script.
 4. Served JavaScript has no `eval(` and no `new Function`. It runs under
    the default CSP.
 5. `markstream_head()` writes the module script, the module preloads and
-   the stylesheet. Each tag has a hashed URL and an SRI hash.
+   the stylesheets. The script and stylesheet tags use hashed URLs. The
+   preload tags use plain URLs. Each tag has an SRI hash.
 6. The `Markstream` builder renders static Markdown. The escaped source
    shows without JavaScript. Typed options map to `data-markstream-*`
    attributes. The default HTML policy is `escape`.
@@ -125,9 +126,9 @@ Use no npm, no bundler and no inline script.
 10. `examples/markstream_demo.rs` shows static, streaming and htmx use.
 11. Docs: README, ADRs, CLAUDE.md and this plan. Text uses ASD-STE100
     style.
-12. Quality gates: `cargo fmt`, clippy pedantic and nursery with no
-    warnings, no `unwrap` in production code, CI, line coverage of 85% or
-    more.
+12. Quality gates: `cargo fmt` and clippy (pedantic, nursery) give no
+    warnings. Production code has no `unwrap`. CI runs. Line coverage is
+    85% or more.
 
 ## TDD slices
 
@@ -140,3 +141,25 @@ Use no npm, no bundler and no inline script.
 | SSE | event shape, JSON round trip, order model | `sse.rs` |
 | Init module | `node --test` on pure helpers | `assets/core.js`, `assets/init.js` |
 | Browser | headless Chromium test | example app |
+
+## Review outcomes
+
+Four review agents read the code: security, correctness, API and docs,
+tests and CI. We fixed each confirmed finding with a test first:
+
+| Finding | Fix | Test |
+|---|---|---|
+| htmx history copy blanks containers | Keep the source `<pre>`; mount into a child `div` | e2e "history copy" |
+| History copy runs `hx-*` in Markdown | `hx-disable` on the render `div` | e2e "cannot run htmx" |
+| Detached elements mount after an earlier mount | Check `isConnected` and nesting just before each mount | e2e "history copy" |
+| `data-markstream-html="trusted"` as an injection gadget | Page meta opt-in, else `safe` | node + e2e |
+| Any `src` opens a stream | Same-origin `http(s)` only | node + e2e |
+| innerHTML swap into a container leaks the stream | Unmount on `htmx:beforeSwap` | e2e "close open streams" |
+| Bad `src` stops later mounts | `try`/`catch`; error state | e2e "fail only their own" |
+| `reset()` keeps the SSE open | Close first | e2e |
+| Stale handle still acts | `active` flag | e2e |
+| `aria-busy` stays `true` | Set on mount; no `src` for `""` | Rust + e2e |
+| Lockstep tests check substrings only | Parse the JS arrays | Rust |
+| SSE test parser dispatches at EOF | Drop the unterminated event | Rust |
+| Vendor script trusts the CDN | npm tarball sha512 check, path guard | Python |
+| Nonce CSP untested | e2e nonce mode; htmx indicator styles off | e2e |

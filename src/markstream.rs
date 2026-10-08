@@ -8,14 +8,15 @@
 //! You can also write these attributes by hand:
 //!
 //! - `data-markstream`: marks the container. Required.
+//! - `class="markstream"`: the plugin styles need it.
 //! - `data-markstream-html="escape|safe|trusted"`: the HTML policy for raw
 //!   HTML in the Markdown. Missing or unknown values mean `escape`.
 //! - `data-markstream-mode="docs|chat|minimal"`: the render mode.
 //! - `data-markstream-theme="light|dark"`: the color theme. Missing means
 //!   the user's `prefers-color-scheme`.
 //! - `data-markstream-typewriter="true"`: animate new text.
-//! - `data-markstream-max-live-nodes="0"`: the live node window. `0` keeps
-//!   all nodes live.
+//! - `data-markstream-max-live-nodes="0"`: the maximum number of live
+//!   nodes. `0` keeps all nodes live.
 //! - `data-markstream-src="/url"`: read Server-Sent Events from this URL.
 //!   See [`crate::sse`].
 //!
@@ -38,7 +39,11 @@ pub(crate) const ATTRIBUTES: [&str; 7] = [
 ];
 
 /// The markstream render mode (`mode` prop).
+///
+/// `Mode` has no default. Without [`Markstream::mode`], markstream uses its
+/// own default mode.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[non_exhaustive]
 pub enum Mode {
     /// Document layout.
     Docs,
@@ -65,13 +70,16 @@ impl Mode {
 /// The default is [`HtmlPolicy::Escape`]. Use it for user input and model
 /// output.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
+#[non_exhaustive]
 pub enum HtmlPolicy {
     /// Show raw HTML as text. The safe default.
     #[default]
     Escape,
     /// Keep an allowlist of tags and attributes.
     Safe,
-    /// Keep all raw HTML. Use only for Markdown that you wrote.
+    /// Keep all raw HTML except `<script>`. Use only for Markdown that you
+    /// wrote. The page head must also hold [`markstream_allow_trusted()`].
+    /// Without it, the browser uses [`HtmlPolicy::Safe`].
     Trusted,
 }
 
@@ -87,8 +95,22 @@ impl HtmlPolicy {
     }
 }
 
+/// Name of the meta tag that allows [`HtmlPolicy::Trusted`] on a page.
+pub const ALLOW_TRUSTED_META: &str = "markstream-allow-trusted";
+
+/// Writes the meta tag that allows [`HtmlPolicy::Trusted`] on this page.
+///
+/// Put it in the page `<head>`. Without it, the init module uses
+/// [`HtmlPolicy::Safe`] for `trusted` containers. Injected markup then
+/// cannot ask for raw HTML.
+#[must_use]
+pub fn markstream_allow_trusted() -> Markup {
+    html! { meta name=(ALLOW_TRUSTED_META) content="true"; }
+}
+
 /// The color theme.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
+#[non_exhaustive]
 pub enum Theme {
     /// Follow the user's `prefers-color-scheme`. The default.
     #[default]
@@ -100,7 +122,7 @@ pub enum Theme {
 }
 
 impl Theme {
-    /// The attribute value. [`Theme::Auto`] has no attribute.
+    /// The theme name. The builder writes no attribute for [`Theme::Auto`].
     #[must_use]
     pub const fn as_str(self) -> &'static str {
         match self {
@@ -161,12 +183,16 @@ impl Markstream {
     }
 
     /// Streams more Markdown from `url` after the current content.
+    ///
+    /// The URL must have the same origin as the page. An empty URL means
+    /// no stream.
     pub fn stream_from(mut self, url: impl Into<String>) -> Self {
         self.src = Some(url.into());
         self
     }
 
-    /// Sets the render mode.
+    /// Sets the render mode. Without this call, markstream uses its own
+    /// default mode.
     pub const fn mode(mut self, mode: Mode) -> Self {
         self.mode = Some(mode);
         self
@@ -190,7 +216,7 @@ impl Markstream {
         self
     }
 
-    /// Sets the live node window. `0` keeps all nodes live.
+    /// Sets the maximum number of live nodes. `0` keeps all nodes live.
     pub const fn max_live_nodes(mut self, nodes: u32) -> Self {
         self.max_live_nodes = Some(nodes);
         self
@@ -215,7 +241,8 @@ impl Render for Markstream {
             .class
             .as_ref()
             .map_or_else(|| "markstream".to_owned(), |c| format!("markstream {c}"));
-        let streaming = self.src.as_ref().map(|_| "true");
+        let src = self.src.as_deref().filter(|s| !s.is_empty());
+        let streaming = src.map(|_| "true");
         html! {
             div class=(class)
                 id=[self.id.as_deref()]
@@ -225,7 +252,7 @@ impl Render for Markstream {
                 data-markstream-theme=[self.theme.attr()]
                 data-markstream-typewriter=[self.typewriter.then_some("true")]
                 data-markstream-max-live-nodes=[self.max_live_nodes]
-                data-markstream-src=[self.src.as_deref()]
+                data-markstream-src=[src]
                 aria-live=[streaming.map(|_| "polite")]
                 aria-busy=[streaming]
             {
@@ -238,6 +265,7 @@ impl Render for Markstream {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::{js_array, js_object_values, js_string};
 
     const CORE_JS: &str = include_str!("../assets/core.js");
 
@@ -360,22 +388,60 @@ mod tests {
         assert_eq!(Theme::default(), Theme::Auto);
     }
 
+    fn sorted(mut v: Vec<String>) -> Vec<String> {
+        v.sort_unstable();
+        v
+    }
+
     #[test]
-    fn rust_and_js_agree_on_attribute_names_and_values() {
-        for attr in ATTRIBUTES {
-            assert!(
-                CORE_JS.contains(&format!("\"{attr}\"")),
-                "core.js lacks {attr}"
-            );
-        }
-        let values = [
-            "docs", "chat", "minimal", "escape", "safe", "trusted", "light", "dark",
-        ];
-        for value in values {
-            assert!(
-                CORE_JS.contains(&format!("\"{value}\"")),
-                "core.js lacks {value}"
-            );
-        }
+    fn rust_and_js_agree_on_attribute_names() {
+        let full = render(
+            &Markstream::stream("/s")
+                .mode(Mode::Chat)
+                .theme(Theme::Dark)
+                .typewriter(true)
+                .max_live_nodes(1),
+        );
+        let re = regex::Regex::new(r"(data-markstream[-a-z]*)=").expect("regex");
+        let rendered = sorted(re.captures_iter(&full).map(|c| c[1].to_owned()).collect());
+        let js = sorted(js_object_values(CORE_JS, "ATTR"));
+        assert_eq!(rendered, js);
+        assert_eq!(sorted(ATTRIBUTES.map(str::to_owned).to_vec()), js);
+    }
+
+    #[test]
+    fn rust_and_js_agree_on_attribute_values() {
+        let names = |v: &[&str]| v.iter().map(|s| (*s).to_owned()).collect::<Vec<_>>();
+        assert_eq!(
+            js_array(CORE_JS, "MODES"),
+            names(&[Mode::Docs, Mode::Chat, Mode::Minimal].map(Mode::as_str))
+        );
+        assert_eq!(
+            js_array(CORE_JS, "HTML_POLICIES"),
+            names(
+                &[HtmlPolicy::Escape, HtmlPolicy::Safe, HtmlPolicy::Trusted]
+                    .map(HtmlPolicy::as_str)
+            )
+        );
+        assert_eq!(
+            js_array(CORE_JS, "THEMES"),
+            names(&[Theme::Light, Theme::Dark].map(Theme::as_str))
+        );
+        assert_eq!(js_string(CORE_JS, "ALLOW_TRUSTED"), ALLOW_TRUSTED_META);
+    }
+
+    #[test]
+    fn an_empty_stream_url_renders_a_static_container() {
+        let html = render(&Markstream::stream("").stream_from(""));
+        assert!(!html.contains("data-markstream-src"), "{html}");
+        assert!(!html.contains("aria-busy"), "{html}");
+    }
+
+    #[test]
+    fn allow_trusted_meta_names_the_js_opt_in() {
+        assert_eq!(
+            markstream_allow_trusted().into_string(),
+            format!(r#"<meta name="{ALLOW_TRUSTED_META}" content="true">"#)
+        );
     }
 }

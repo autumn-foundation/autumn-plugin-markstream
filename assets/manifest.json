@@ -275,7 +275,7 @@
   },
   "homepage": "https://markstream.simonhe.me",
   "license": "MIT (see assets/licenses/)",
-  "notes": "Vendoring provenance. Not served. 'upstream_integrity' pins the bytes from the CDN. 'integrity' pins the served bytes after the bare-import rewrite.",
+  "notes": "Vendoring provenance. Not served. The files come from npm tarballs checked against the registry sha512. 'upstream_integrity' pins the upstream bytes. 'integrity' pins the served bytes after the bare-import rewrite.",
   "optional_peers": [
     "@terrastruct/d2",
     "katex",

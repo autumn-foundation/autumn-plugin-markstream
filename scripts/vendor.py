@@ -2,26 +2,31 @@
 """Vendor markstream-vue and its dependencies into assets/vendor/.
 
 The script:
-1. Downloads pinned files from jsDelivr (or reads them from --from DIR).
+1. Downloads each pinned npm tarball and checks it against the registry
+   `dist.integrity` (sha512). It reads the files from the tarballs.
 2. Walks the markstream-vue module graph from dist/index.js.
 3. Rewrites bare imports to relative paths. Then no import map is needed.
 4. Writes assets/manifest.json with upstream and served SHA-384 pins.
 5. Writes src/vendored.rs (generated: bundle entries, eager modules).
 
-Run from the crate root: python3 scripts/vendor.py [--from DIR]
+Run from the crate root: python3 scripts/vendor.py
 """
 
-import argparse
 import base64
 import hashlib
+import io
 import json
 import os
 import posixpath
 import re
+import shutil
 import sys
+import tarfile
+import urllib.parse
 import urllib.request
 
 CDN = "https://cdn.jsdelivr.net/npm"
+REGISTRY = "https://registry.npmjs.org"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ASSETS = os.path.join(ROOT, "assets")
 VENDOR = "vendor"
@@ -52,7 +57,8 @@ OPTIONAL_PEERS = {
     "stream-diffs/markstream", "@terrastruct/d2",
 }
 
-SPEC = re.compile(r"""((?:\bfrom|\bimport)\s*\(?\s*)(["'])([^"'\s]+)\2""")
+# `(` only after `import`: `Array.from("x")` is not an import.
+SPEC = re.compile(r"""(\bimport\s*\(\s*|(?:\bfrom|\bimport)\s*)(["'])([^"'\s]+)\2""")
 
 
 def sri(data):
@@ -60,13 +66,46 @@ def sri(data):
     return "sha384-" + base64.b64encode(digest).decode()
 
 
-def fetch(pkg, version, path, local):
-    if local:
-        with open(os.path.join(local, pkg, version, path), "rb") as f:
-            return f.read()
-    url = f"{CDN}/{pkg}@{version}/{path}"
-    with urllib.request.urlopen(url, timeout=60) as resp:
+_TARBALLS = {}
+
+
+def get(url):
+    with urllib.request.urlopen(url, timeout=120) as resp:
         return resp.read()
+
+
+def tarball(pkg, version):
+    """The checked tarball of pkg@version, as a dict: path -> bytes."""
+    key = (pkg, version)
+    if key not in _TARBALLS:
+        meta = json.loads(get(f"{REGISTRY}/{urllib.parse.quote(pkg, safe='@')}/{version}"))
+        data = get(meta["dist"]["tarball"])
+        algo, _, want = meta["dist"]["integrity"].partition("-")
+        if algo != "sha512":
+            sys.exit(f"{pkg}@{version}: unsupported integrity {algo}")
+        got = base64.b64encode(hashlib.sha512(data).digest()).decode()
+        if got != want:
+            sys.exit(f"{pkg}@{version}: tarball does not match the registry integrity")
+        files = {}
+        with tarfile.open(fileobj=io.BytesIO(data), mode="r:gz") as tar:
+            for member in tar.getmembers():
+                if member.isfile() and member.name.startswith("package/"):
+                    files[member.name[len("package/"):]] = tar.extractfile(member).read()
+        _TARBALLS[key] = files
+    return _TARBALLS[key]
+
+
+def fetch(pkg, version, path):
+    files = tarball(pkg, version)
+    if path not in files:
+        sys.exit(f"{pkg}@{version} has no {path}")
+    return files[path]
+
+
+def inside(path, root):
+    """True when `path` stays inside the directory `root`."""
+    root = os.path.realpath(root)
+    return os.path.commonpath([os.path.realpath(path), root]) == root
 
 
 def specifiers(text):
@@ -149,11 +188,6 @@ def rewrite(text, served_path, targets):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--from", dest="local",
-                        help="read <DIR>/<pkg>/<version>/<path>, not the CDN")
-    args = parser.parse_args()
-
     targets = {name: s[3] for name, s in SINGLES.items()}
     files = {}  # served path -> (bytes, source dict)
 
@@ -168,7 +202,7 @@ def main():
         })
 
     for pkg, version, path, served in SINGLES.values():
-        raw = fetch(pkg, version, path, args.local)
+        raw = fetch(pkg, version, path)
         out = rewrite(raw.decode("utf-8"), served, targets).encode("utf-8")
         add(served, raw, out, pkg, version, path)
 
@@ -180,7 +214,9 @@ def main():
         if path in seen:
             continue
         seen.add(path)
-        raw = fetch(pkg, version, path, args.local)
+        if not path.startswith("dist/") or ".." in path.split("/"):
+            sys.exit(f"import leaves dist/: {path}")
+        raw = fetch(pkg, version, path)
         text = raw.decode("utf-8")
         for spec in specifiers(text):
             if spec.startswith("."):
@@ -194,11 +230,15 @@ def main():
         add(served, raw, out, pkg, version, path)
 
     css_path, css_served = MARKSTREAM_CSS
-    css = fetch(pkg, version, css_path, args.local)
+    css = fetch(pkg, version, css_path)
     add(css_served, css, css, pkg, version, css_path)
 
+    vendor_root = os.path.join(ASSETS, VENDOR)
+    shutil.rmtree(vendor_root, ignore_errors=True)
     for served, (data, _) in files.items():
-        dest = os.path.join(ASSETS, VENDOR, served)
+        dest = os.path.join(vendor_root, served)
+        if not inside(dest, vendor_root):
+            sys.exit(f"refusing to write outside {vendor_root}: {served}")
         os.makedirs(os.path.dirname(dest), exist_ok=True)
         with open(dest, "wb") as f:
             f.write(data)
@@ -206,9 +246,10 @@ def main():
     manifest = {
         "homepage": "https://markstream.simonhe.me",
         "license": "MIT (see assets/licenses/)",
-        "notes": ("Vendoring provenance. Not served. 'upstream_integrity' "
-                  "pins the bytes from the CDN. 'integrity' pins the served "
-                  "bytes after the bare-import rewrite."),
+        "notes": ("Vendoring provenance. Not served. The files come from "
+                  "npm tarballs checked against the registry sha512. "
+                  "'upstream_integrity' pins the upstream bytes. 'integrity' "
+                  "pins the served bytes after the bare-import rewrite."),
         "optional_peers": sorted(OPTIONAL_PEERS),
         "files": {f"{VENDOR}/{k}": v for k, (_, v) in sorted(files.items())},
     }

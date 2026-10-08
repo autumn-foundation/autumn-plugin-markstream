@@ -13,13 +13,12 @@
 //! `\n` and Unicode stay the same. `done` and `error` carry `null`,
 //! because a browser does not dispatch an event with no data.
 //!
-//! The browser does not reconnect. A reconnect would start the stream
-//! again and show the text two times. A stream that stops before `done`
+//! The init module closes the stream and does not reconnect. A reconnect
+//! would start the stream again and show the text two times. A stream that stops before `done`
 //! shows the error state.
 //!
 //! ```rust,no_run
-//! use autumn_plugin_markstream::sse::markstream_sse;
-//! use futures_util::stream;
+//! use autumn_plugin_markstream::sse::{markstream_sse, stream};
 //!
 //! # fn handler() -> impl autumn_web::reexports::axum::response::IntoResponse {
 //! markstream_sse(stream::iter(["# Title\n", "Some ", "*text*."]))
@@ -29,7 +28,9 @@
 use std::convert::Infallible;
 
 use autumn_web::sse::{Event, Sse};
-use futures_util::{Stream, StreamExt as _, stream};
+use futures_util::StreamExt as _;
+/// Re-exported from `futures-util`, so you can build chunk streams.
+pub use futures_util::{Stream, stream};
 
 /// Event name: add text.
 pub const EVENT_CHUNK: &str = "chunk";
@@ -42,6 +43,8 @@ pub const EVENT_ERROR: &str = "error";
 
 /// One markstream event.
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[must_use]
+#[non_exhaustive]
 pub enum StreamEvent {
     /// Add this text to the end.
     Chunk(String),
@@ -106,10 +109,11 @@ where
 
 /// Turns fallible text chunks into markstream events.
 ///
-/// It skips empty chunks. At the first `Err` it sends [`StreamEvent::Error`]
-/// and stops. Else it sends [`StreamEvent::Done`] at the end. Exactly one of
-/// `Done` and `Error` comes, and it comes last. The error value does not go
-/// to the client. Log it before this function if you need it.
+/// It skips empty chunks. At the first `Err`, it sends
+/// [`StreamEvent::Error`] and stops. If no error occurs, it sends
+/// [`StreamEvent::Done`] at the end. The last event is always one `Done` or
+/// one `Error`. The error value does not go to the client. Log it before
+/// this function if you need it.
 pub fn try_stream_events<S, T, E>(chunks: S) -> impl Stream<Item = StreamEvent>
 where
     S: Stream<Item = Result<T, E>>,
@@ -201,6 +205,15 @@ mod tests {
         })
         .expect("body");
         parse_sse(std::str::from_utf8(&body).expect("utf-8"))
+    }
+
+    #[test]
+    fn rust_and_js_agree_on_event_names() {
+        let core = include_str!("../assets/core.js");
+        assert_eq!(
+            crate::test_support::js_array(core, "EVENTS"),
+            [EVENT_CHUNK, EVENT_REPLACE, EVENT_DONE, EVENT_ERROR]
+        );
     }
 
     #[test]

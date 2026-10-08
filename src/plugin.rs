@@ -1,7 +1,7 @@
 //! [`MarkstreamPlugin`]: installs the markstream assets in an Autumn app.
 //!
 //! The plugin gives [`MARKSTREAM_ASSETS`] to Autumn's
-//! `AppBuilder::plugin_assets` seam. It adds no other routes and reads no
+//! `AppBuilder::plugin_assets` method. It adds no other routes and reads no
 //! configuration.
 
 use std::borrow::Cow;

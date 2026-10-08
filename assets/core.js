@@ -30,25 +30,52 @@ function oneOf(value, allowed) {
   return allowed.includes(value) ? value : null;
 }
 
+/** The page opt-in for the "trusted" HTML policy (a meta tag name). */
+export const ALLOW_TRUSTED = "markstream-allow-trusted";
+
 /**
  * Reads the container options.
  * `getAttr(name)` returns the attribute value or null.
  * `prefersDark` is the user's `prefers-color-scheme: dark` result.
+ * `allowTrusted` is true when the page opts in to "trusted". Without it,
+ * "trusted" becomes "safe": injected markup cannot ask for raw HTML.
  * Unknown values fall back to safe values.
  */
-export function readOptions(getAttr, prefersDark) {
+export function readOptions(getAttr, prefersDark, { allowTrusted = false } = {}) {
   const theme = oneOf(getAttr(ATTR.theme), THEMES);
   const nodes = getAttr(ATTR.maxLiveNodes);
   const parsed = nodes !== null && /^\d+$/.test(nodes) ? Number(nodes) : null;
   const src = getAttr(ATTR.src);
+  let htmlPolicy = oneOf(getAttr(ATTR.html), HTML_POLICIES) ?? "escape";
+  if (htmlPolicy === "trusted" && !allowTrusted) {
+    htmlPolicy = "safe";
+  }
   return {
-    htmlPolicy: oneOf(getAttr(ATTR.html), HTML_POLICIES) ?? "escape",
+    htmlPolicy,
     mode: oneOf(getAttr(ATTR.mode), MODES),
     isDark: theme === null ? Boolean(prefersDark) : theme === "dark",
     typewriter: getAttr(ATTR.typewriter) === "true",
     maxLiveNodes: parsed,
     src: src ? src : null,
   };
+}
+
+/**
+ * Resolves `src` against `baseHref`. Returns the absolute URL when it has
+ * the same origin and an http(s) scheme, else null.
+ */
+export function sameOriginUrl(src, baseHref) {
+  if (!src) {
+    return null;
+  }
+  try {
+    const url = new URL(src, baseHref);
+    const base = new URL(baseHref);
+    const web = url.protocol === "http:" || url.protocol === "https:";
+    return web && url.origin === base.origin ? url.href : null;
+  } catch {
+    return null;
+  }
 }
 
 /** Decodes SSE data: a JSON string gives the string, else null. */

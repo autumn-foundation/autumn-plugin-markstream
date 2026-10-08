@@ -63,6 +63,9 @@ fn layout(content: &Markup) -> Markup {
                 meta charset="utf-8";
                 meta name="viewport" content="width=device-width, initial-scale=1";
                 title { "markstream demo" }
+                // htmx must not inject its indicator <style>: CSP nonce mode
+                // blocks inline styles.
+                meta name="htmx-config" content=r#"{"includeIndicatorStyles":false}"#;
                 link rel="stylesheet" href=(asset_url("css/demo.css"));
                 (markstream_head())
                 script src=(asset_url("js/htmx.min.js")) defer {}

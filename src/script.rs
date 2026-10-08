@@ -3,8 +3,8 @@
 //! Put [`markstream_head()`] in the page `<head>`. It writes:
 //!
 //! 1. The stylesheets ([`markstream_stylesheet()`]).
-//! 2. One `<link rel="modulepreload">` for each module that loads before
-//!    the init module runs ([`markstream_preloads()`]). The browser fetches
+//! 2. One `<link rel="modulepreload">` for `core.js` and for each module
+//!    that loads before the init module runs ([`markstream_preloads()`]). The browser fetches
 //!    them in parallel and checks each `integrity` hash.
 //! 3. The init module script ([`markstream_script()`]).
 //!
@@ -36,7 +36,9 @@ pub fn markstream_head() -> Markup {
 
 /// Writes the `<script type="module">` tag for the init module.
 ///
-/// Module scripts run after the document is parsed, in order.
+/// Module scripts run after the document is parsed, in order. This tag
+/// checks only the init module. Use [`markstream_head()`] or add
+/// [`markstream_preloads()`]: the preloads check the eager modules.
 #[must_use]
 pub fn markstream_script() -> Markup {
     html! {
@@ -47,7 +49,8 @@ pub fn markstream_script() -> Markup {
     }
 }
 
-/// Writes one `<link rel="modulepreload">` for each eager module.
+/// Writes one `<link rel="modulepreload">` for `core.js` and for each
+/// eager module.
 ///
 /// The `href` is the plain URL, because relative imports resolve to it.
 /// The browser then uses the preloaded and checked module.

@@ -8,6 +8,7 @@ import {
   readOptions,
   reduce,
   rendererProps,
+  sameOriginUrl,
 } from "../../assets/core.js";
 
 const attrs = (map) => (name) => (name in map ? map[name] : null);
@@ -171,4 +172,24 @@ test("rendererProps: maps options and state to markstream props", () => {
   const bare = rendererProps(readOptions(attrs({}), false), initialState("", false));
   assert.equal("mode" in bare, false);
   assert.equal("maxLiveNodes" in bare, false);
+});
+
+test("readOptions: trusted needs the page opt-in, else safe", () => {
+  const get = attrs({ "data-markstream-html": "trusted" });
+  assert.equal(readOptions(get, false).htmlPolicy, "safe");
+  assert.equal(readOptions(get, false, { allowTrusted: false }).htmlPolicy, "safe");
+  assert.equal(readOptions(get, false, { allowTrusted: true }).htmlPolicy, "trusted");
+});
+
+test("sameOriginUrl: only same-origin http(s) URLs", () => {
+  const base = "https://app.example/page/1";
+  assert.equal(sameOriginUrl("/answer/1", base), "https://app.example/answer/1");
+  assert.equal(sameOriginUrl("answer?x=1", base), "https://app.example/page/answer?x=1");
+  assert.equal(sameOriginUrl("https://app.example/s", base), "https://app.example/s");
+  assert.equal(sameOriginUrl("https://evil.example/s", base), null);
+  assert.equal(sameOriginUrl("//evil.example/s", base), null);
+  assert.equal(sameOriginUrl("javascript:alert(1)", base), null);
+  assert.equal(sameOriginUrl("http://exa mple.com/", base), null);
+  assert.equal(sameOriginUrl("", base), null);
+  assert.equal(sameOriginUrl(null, base), null);
 });
