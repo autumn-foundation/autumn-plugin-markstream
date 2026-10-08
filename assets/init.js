@@ -20,14 +20,17 @@ import MarkdownRender, {
   disableInfographic,
   disableKatex,
   disableMermaid,
+  setCustomComponents,
 } from "./vendor/markstream-vue/index.js";
 import {
   ALLOW_TRUSTED,
   ATTR,
+  CUSTOM_ID,
   EVENTS,
   MOUNTED,
   STATE,
   decodeData,
+  highlight,
   initialState,
   readOptions,
   reduce,
@@ -43,6 +46,32 @@ disableInfographic();
 if (!globalThis.katex) {
   disableKatex();
 }
+
+/**
+ * The "code_block" component: a plain <pre><code> with token spans.
+ * It uses classes only (no inline style), so the default CSP allows it.
+ * Text goes through Vue text nodes, so code is never parsed as HTML.
+ */
+const CodeBlock = {
+  name: "AutumnCodeBlock",
+  props: { node: { type: Object, required: true }, isDark: Boolean },
+  setup(props) {
+    return () => {
+      const node = props.node ?? {};
+      const lang = String(node.language ?? "").trim().split(/\s/)[0].toLowerCase();
+      const code = String(node.code ?? node.raw ?? "");
+      const children = highlight(code, lang).map((token) =>
+        token.type === "plain" ? token.text : h("span", { class: "ms-tok-" + token.type }, token.text),
+      );
+      return h(
+        "pre",
+        { class: "markstream-code" + (props.isDark ? " is-dark" : ""), "data-language": lang || null },
+        [h("code", { class: lang ? "language-" + lang : null }, children)],
+      );
+    };
+  },
+};
+setCustomComponents(CUSTOM_ID, { code_block: CodeBlock });
 
 const SELECTOR = "[" + ATTR.root + "]";
 const RENDER = "markstream-render";

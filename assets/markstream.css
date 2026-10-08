@@ -18,3 +18,32 @@
   outline: 2px solid #d64545;
   outline-offset: 4px;
 }
+
+/* Code blocks: <pre class="markstream-code"> with token spans. */
+.markstream-code {
+  margin: 0.75em 0;
+  padding: 0.75em 1em;
+  overflow-x: auto;
+  border-radius: 6px;
+  background: #f6f8fa;
+  color: #24292f;
+  font: 0.875em/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  tab-size: 4;
+}
+.markstream-code code {
+  font: inherit;
+  white-space: pre;
+}
+.markstream-code .ms-tok-keyword { color: #cf222e; }
+.markstream-code .ms-tok-string { color: #0a3069; }
+.markstream-code .ms-tok-number { color: #0550ae; }
+.markstream-code .ms-tok-comment { color: #6e7781; font-style: italic; }
+
+.markstream-code.is-dark {
+  background: #161b22;
+  color: #e6edf3;
+}
+.markstream-code.is-dark .ms-tok-keyword { color: #ff7b72; }
+.markstream-code.is-dark .ms-tok-string { color: #a5d6ff; }
+.markstream-code.is-dark .ms-tok-number { color: #79c0ff; }
+.markstream-code.is-dark .ms-tok-comment { color: #8b949e; }

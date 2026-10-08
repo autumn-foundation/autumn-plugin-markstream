@@ -134,6 +134,12 @@ try {
     assert.equal(await doc.locator(".markstream-render[hx-disable]").count(), 1);
   });
 
+  await check("code blocks have syntax highlighting", async () => {
+    const doc = page.locator("#static-doc");
+    await doc.locator("pre.markstream-code code .ms-tok-keyword").first().waitFor({ timeout: 10000 });
+    assert.ok((await doc.locator("pre.markstream-code .ms-tok-string").count()) >= 1);
+  });
+
   await check("raw HTML is escaped by default", async () => {
     const doc = page.locator("#static-doc");
     assert.equal(await doc.locator("b").count(), 0);
