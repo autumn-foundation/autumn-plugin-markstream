@@ -47,12 +47,14 @@ const ANSWERS: [&str; 2] = [
 
 #[autumn_web::main]
 async fn main() {
-    autumn_web::app()
-        .plugin(MarkstreamPlugin::new())
-        .embedded_static(&STATIC)
-        .routes(autumn_web::routes![index, ask, answer])
-        .run()
-        .await;
+    Box::pin(
+        autumn_web::app()
+            .plugin(MarkstreamPlugin::new())
+            .embedded_static(&STATIC)
+            .routes(autumn_web::routes![index, ask, answer])
+            .run(),
+    )
+    .await;
 }
 
 fn layout(content: &Markup) -> Markup {
