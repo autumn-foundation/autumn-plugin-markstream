@@ -15,7 +15,7 @@ default = []
 
 [dependencies]
 # No default features. The host app selects the Autumn features.
-autumn-web = { version = "0.8", default-features = false, features = ["maud"] }
+autumn-web = { version = "0.9", default-features = false, features = ["maud"] }
 futures-util = { version = "0.3", default-features = false, features = ["std"] }
 # The `html!` macro expands to `maud::` paths.
 maud = "0.27"
@@ -23,7 +23,7 @@ serde_json = "1"
 
 [dev-dependencies]
 # `htmx` and `embed-assets` are for the demo and the tests only.
-autumn-web = { version = "0.8", default-features = false, features = ["maud", "embed-assets", "htmx"] }
+autumn-web = { version = "0.9", default-features = false, features = ["maud", "embed-assets", "htmx"] }
 base64 = "0.22"
 proptest = "1"
 regex = "1"
