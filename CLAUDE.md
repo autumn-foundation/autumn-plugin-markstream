@@ -15,6 +15,8 @@ Autumn plugin for markstream (streaming Markdown). Rust crate, Autumn 0.10.
 
 ## Rules
 
+- README Rust snippets are doctests. Make them compile; use `no_run`, not `ignore`.
+  `tests/doc_snippets.rs` checks the TOML snippets and the version pins in the docs.
 - Keep attribute names and values the same in `src/markstream.rs` and
   `assets/core.js`. A test checks this.
 - Keep event names the same in `src/sse.rs` and `assets/core.js`.
