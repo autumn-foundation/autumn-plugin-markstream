@@ -25,13 +25,13 @@ jobs:
       - run: cargo llvm-cov --lib --ignore-filename-regex 'test_support' --fail-under-lines 85
 
   msrv:
-    name: MSRV (1.88)
+    name: MSRV (1.97)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: rustup toolchain install 1.88 --profile minimal
+      - run: rustup toolchain install 1.97 --profile minimal
       - uses: Swatinem/rust-cache@v2
-      - run: cargo +1.88 check --all-targets --locked
+      - run: cargo +1.97 check --all-targets --locked
 
   js:
     name: init module tests
