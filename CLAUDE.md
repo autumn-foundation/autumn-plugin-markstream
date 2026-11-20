@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Autumn plugin for markstream (streaming Markdown). Rust crate, Autumn 0.10.
+Autumn plugin for markstream (streaming Markdown). Rust crate, Autumn 0.11.
 
 ## Layout
 
